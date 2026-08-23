@@ -181,11 +181,15 @@ pub async fn purchase_asset(
         .await
     {
         Ok(()) => Ok(Redirect::to("/assets").into_response()),
-        Err(error) => Ok(
-            render_assets_page(repository, user, Some(error.to_string()))
-                .await?
-                .into_response(),
-        ),
+        Err(error) => {
+            let error = AppError::Database(error);
+            tracing::error!(error = ?error, "purchase registration failed");
+            Ok(
+                render_assets_page(repository, user, Some(error.public_message().to_owned()))
+                    .await?
+                    .into_response(),
+            )
+        }
     }
 }
 

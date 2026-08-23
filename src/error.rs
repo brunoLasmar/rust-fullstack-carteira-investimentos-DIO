@@ -29,19 +29,43 @@ pub struct ErrorResponse {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
-        let error_response = ErrorResponse {
-            error: self.to_string(),
-        };
-
-        let status = match self {
+        let status = match &self {
             Self::UsernameTaken | Self::MissingAuthorization => StatusCode::BAD_REQUEST,
             Self::InvalidCredentials => StatusCode::UNAUTHORIZED,
             Self::AssetDoesNotExist | Self::UserDoesNotExist => StatusCode::NOT_FOUND,
-            Self::Database(_) | Self::Template(_) | Self::Jwt(_) => {
+            Self::Database(error) => {
+                tracing::error!(error = ?error, "database error");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::Template(error) => {
+                tracing::error!(error = ?error, "template rendering error");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::Jwt(error) => {
+                tracing::error!(error = ?error, "JWT error");
                 StatusCode::INTERNAL_SERVER_ERROR
             }
         };
 
+        let error_response = ErrorResponse {
+            error: self.public_message().to_owned(),
+        };
+
         (status, Json(error_response)).into_response()
+    }
+}
+
+impl AppError {
+    pub fn public_message(&self) -> &'static str {
+        match self {
+            Self::MissingAuthorization => "Missing Authorization Headers",
+            Self::InvalidCredentials => "Invalid Credentials",
+            Self::AssetDoesNotExist => "Asset does not exist",
+            Self::UserDoesNotExist => "User does not exist",
+            Self::UsernameTaken => "This username is already registered",
+            Self::Database(_) => "an internal database error occurred",
+            Self::Template(_) => "an internal rendering error occurred",
+            Self::Jwt(_) => "an internal authentication error occurred",
+        }
     }
 }
