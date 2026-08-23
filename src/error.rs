@@ -43,7 +43,7 @@ impl IntoResponse for AppError {
             }
             Self::Jwt(error) => {
                 tracing::error!(error = ?error, "JWT error");
-                StatusCode::INTERNAL_SERVER_ERROR
+                StatusCode::UNAUTHORIZED
             }
         };
 
