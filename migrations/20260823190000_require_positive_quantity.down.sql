@@ -1,0 +1,2 @@
+ALTER TABLE owned_assets
+DROP CONSTRAINT IF EXISTS owned_assets_quantity_owned_positive;
