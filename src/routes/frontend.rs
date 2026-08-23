@@ -41,10 +41,24 @@ fn render_login_page(error_message: Option<&str>) -> Result<Html<String>, AppErr
 
 #[derive(Template)]
 #[template(path = "register.html")]
-struct RegisterPage;
+struct RegisterPage {
+    error_message: Option<String>,
+    tried_username: Option<String>,
+}
 
 async fn register_page() -> Result<Html<String>, AppError> {
-    let html = RegisterPage.render()?;
+    render_register_page(None, None)
+}
+
+fn render_register_page(
+    error_message: Option<&str>,
+    tried_username: Option<&str>,
+) -> Result<Html<String>, AppError> {
+    let html = RegisterPage {
+        error_message: error_message.map(str::to_owned),
+        tried_username: tried_username.map(str::to_owned),
+    }
+    .render()?;
     Ok(Html(html))
 }
 
@@ -80,11 +94,18 @@ async fn login(
 async fn register(
     repository: Repository,
     Form(request): Form<LoginForm>,
-) -> Result<impl IntoResponse, AppError> {
-    let unauth_user = UnauthenticatedUser::new(request.username, request.password);
-    unauth_user.register(&repository).await?;
-
-    Ok(Redirect::to("/login"))
+) -> Result<Response, AppError> {
+    let LoginForm { username, password } = request;
+    let unauth_user = UnauthenticatedUser::new(username.clone(), password);
+    match unauth_user.register(&repository).await {
+        Ok(_user) => Ok(Redirect::to("/login").into_response()),
+        Err(AppError::UsernameTaken) => Ok(render_register_page(
+            Some("username is already taken"),
+            Some(&username),
+        )?
+        .into_response()),
+        Err(other_error) => Err(other_error),
+    }
 }
 
 async fn index(maybe_user: Option<User>) -> Result<Response, AppError> {
