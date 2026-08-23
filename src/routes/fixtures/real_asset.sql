@@ -1,2 +1,2 @@
 INSERT INTO assets (name, unit_value)
-VALUES ('Bitcoin', 10.0);
+VALUES ('Real', 1.0);
