@@ -20,6 +20,36 @@
             <p class="mb-6 rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">{{ error_message }}</p>
         {% endif %}
 
+        <section class="mb-8 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+            <h2 class="mb-4 text-sm uppercase tracking-wider text-white/40">portfolio summary</h2>
+            <div class="grid gap-4 sm:grid-cols-4">
+                <div>
+                    <p class="text-xs text-white/40">invested value</p>
+                    <p class="mt-1 text-lg text-white">$ {{ portfolio_summary.invested_value }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-white/40">current value</p>
+                    <p class="mt-1 text-lg text-white">$ {{ portfolio_summary.current_value }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-white/40">total return</p>
+                    {% if portfolio_summary.total_return >= 0.0 %}
+                        <p class="mt-1 text-lg text-emerald-400">+${{ portfolio_summary.total_return }}</p>
+                    {% else %}
+                        <p class="mt-1 text-lg text-rose-400">$ {{ portfolio_summary.total_return }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="text-xs text-white/40">return</p>
+                    {% if portfolio_summary.return_percentage >= 0.0 %}
+                        <p class="mt-1 text-lg text-emerald-400">+{{ portfolio_summary.return_percentage|percentage }}%</p>
+                    {% else %}
+                        <p class="mt-1 text-lg text-rose-400">{{ portfolio_summary.return_percentage|percentage }}%</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
         <div class="grid grid-cols-12 gap-4 border-b border-white/10 px-4 pb-3 text-xs uppercase tracking-wider text-white/40">
             <div class="col-span-4">name</div>
             <div class="col-span-2 text-right">quantity</div>

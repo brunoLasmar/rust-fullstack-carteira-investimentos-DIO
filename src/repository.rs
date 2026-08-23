@@ -5,7 +5,7 @@ use sqlx::PgPool;
 
 use crate::{
     app::AppState,
-    models::{Asset, OwnedAsset, UserRecord},
+    models::{Asset, OwnedAsset, PortfolioSummary, UserRecord},
 };
 
 pub struct Repository {
@@ -106,6 +106,31 @@ impl Repository {
             user_id
         )
         .fetch_all(&self.db)
+        .await
+    }
+
+    pub async fn portfolio_summary(&self, user_id: i64) -> sqlx::Result<PortfolioSummary> {
+        sqlx::query_as!(
+            PortfolioSummary,
+            r#"
+            SELECT
+             COALESCE(SUM(o.bought_for * o.quantity_owned), 0.0) AS "invested_value!",
+             COALESCE(SUM(a.unit_value * o.quantity_owned), 0.0) AS "current_value!",
+             COALESCE(SUM((a.unit_value - o.bought_for) * o.quantity_owned), 0.0) AS "total_return!",
+             CASE
+              WHEN COALESCE(SUM(o.bought_for * o.quantity_owned), 0.0) > 0.0
+              THEN COALESCE(SUM((a.unit_value - o.bought_for) * o.quantity_owned), 0.0)
+                   / SUM(o.bought_for * o.quantity_owned) * 100.0
+              ELSE 0.0
+             END AS "return_percentage!"
+            FROM assets AS a
+            JOIN owned_assets AS o
+              ON o.asset_id = a.id
+            WHERE o.user_id = $1;
+            "#,
+            user_id
+        )
+        .fetch_one(&self.db)
         .await
     }
 

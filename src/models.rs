@@ -33,3 +33,10 @@ pub struct OwnedAsset {
     pub quantity_owned: f64,
     pub purchase_history: Json<Vec<PurchaseHistory>>,
 }
+
+pub struct PortfolioSummary {
+    pub invested_value: f64,
+    pub current_value: f64,
+    pub total_return: f64,
+    pub return_percentage: f64,
+}

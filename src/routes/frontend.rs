@@ -12,7 +12,7 @@ use crate::{
     app::AppState,
     auth::user::{UnauthenticatedUser, User},
     error::AppError,
-    models::{Asset, OwnedAsset},
+    models::{Asset, OwnedAsset, PortfolioSummary},
     repository::Repository,
 };
 
@@ -120,6 +120,7 @@ async fn register(
 pub struct AssetsPage {
     owned_assets: Vec<OwnedAsset>,
     available_assets: Vec<Asset>,
+    portfolio_summary: PortfolioSummary,
     error_message: Option<String>,
     user: User,
 }
@@ -133,14 +134,16 @@ async fn render_assets_page(
     user: User,
     error_message: Option<String>,
 ) -> Result<Html<String>, AppError> {
-    let (owned_assets, available_assets) = try_join!(
+    let (owned_assets, available_assets, portfolio_summary) = try_join!(
         repository.list_owned_assets(user.id()),
-        repository.list_assets()
+        repository.list_assets(),
+        repository.portfolio_summary(user.id())
     )?;
 
     let html = AssetsPage {
         owned_assets,
         available_assets,
+        portfolio_summary,
         error_message,
         user,
     }
@@ -198,6 +201,11 @@ pub mod filters {
     use time::{
         OffsetDateTime, format_description::StaticFormatDescription, macros::format_description,
     };
+
+    #[askama::filter_fn]
+    pub fn percentage(value: &f64, _env: &dyn askama::Values) -> askama::Result<String> {
+        Ok(format!("{value:.2}"))
+    }
 
     #[askama::filter_fn]
     pub fn human_datetime(
