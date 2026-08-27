@@ -203,6 +203,11 @@ pub mod filters {
     };
 
     #[askama::filter_fn]
+    pub fn decimal(value: &f64, _env: &dyn askama::Values) -> askama::Result<String> {
+        Ok(format!("{value:.2}"))
+    }
+
+    #[askama::filter_fn]
     pub fn percentage(value: &f64, _env: &dyn askama::Values) -> askama::Result<String> {
         Ok(format!("{value:.2}"))
     }

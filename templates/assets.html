@@ -34,9 +34,9 @@
                 <div>
                     <p class="text-xs text-white/40">total return</p>
                     {% if portfolio_summary.total_return >= 0.0 %}
-                        <p class="mt-1 text-lg text-emerald-400">+${{ portfolio_summary.total_return }}</p>
+                        <p class="mt-1 text-lg text-emerald-400">+$ {{ portfolio_summary.total_return|decimal }}</p>
                     {% else %}
-                        <p class="mt-1 text-lg text-rose-400">$ {{ portfolio_summary.total_return }}</p>
+                        <p class="mt-1 text-lg text-rose-400">$ {{ portfolio_summary.total_return|decimal }}</p>
                     {% endif %}
                 </div>
                 <div>
@@ -64,9 +64,9 @@
                     <span class="col-span-2 text-right text-white/80">{{ asset.quantity_owned }}</span>
                     <span class="col-span-3 text-right text-white/80">$ {{ asset.unit_value }}</span>
                     {% if asset.value_delta >= 0.0 %}
-                        <span class="col-span-3 text-right text-emerald-400">+{{ asset.value_delta }}</span>
+                        <span class="col-span-3 text-right text-emerald-400">+{{ asset.value_delta|decimal }}</span>
                     {% else %}
-                        <span class="col-span-3 text-right text-rose-400">{{ asset.value_delta }}</span>
+                        <span class="col-span-3 text-right text-rose-400">{{ asset.value_delta|decimal }}</span>
                     {% endif %}
                 </button>
 
@@ -79,13 +79,13 @@
                     </div>
                     {% for purchase in asset.purchase_history.0 %}
                         <div class="grid grid-cols-12 gap-4 border-b border-white/5 px-4 py-2 text-xs text-white/60 last:border-b-0">
-                            <div class="col-span-4">{{ purchase.bought_at }}</div>
+                            <div class="col-span-4">{{ purchase.bought_at|human_datetime }}</div>
                             <div class="col-span-2 text-right">{{ purchase.quantity_bought }}</div>
                             <div class="col-span-3 text-right">$ {{ purchase.bought_for }}</div>
                             {% if purchase.value_delta >= 0.0 %}
-                                <div class="col-span-3 text-right text-emerald-400">+{{ purchase.value_delta }}</div>
+                                <div class="col-span-3 text-right text-emerald-400">+{{ purchase.value_delta|decimal }}</div>
                             {% else %}
-                                <div class="col-span-3 text-right text-rose-400">{{ purchase.value_delta }}</div>
+                                <div class="col-span-3 text-right text-rose-400">{{ purchase.value_delta|decimal }}</div>
                             {% endif %}
                         </div>
                     {% endfor %}
